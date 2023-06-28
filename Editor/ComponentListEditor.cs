@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using System;
 
-// アセットにあるオブジェクトのコンポーネントを一覧表示するクラス
+// アセットにあるオブジェクトのコンポーネントを一覧表示・検索・追加するクラス
 public class ComponentListEditor : EditorWindow
 {
 
@@ -14,13 +14,13 @@ public class ComponentListEditor : EditorWindow
         ParticleSystem,
         Rigidbody,
         BoxCollider,
-        Canvas
+        // Canvas
         // 他のコンポーネントを追加する場合はここに列挙
     }
     private ComponentType selectedComponentType = ComponentType.All;
 
-    // メニュー欄に追加する
-    [MenuItem("エディター拡張/プレハブ一覧・検索")]
+    // メニュー欄に追加
+    [MenuItem("エディター拡張/プレハブ一覧・検索・追加")]
     public static void ShowWindow(){
         // エディターウィンドウを作成して表示し、そのインスタンスを返す
         EditorWindow.GetWindow(typeof(ComponentListEditor));
@@ -29,19 +29,18 @@ public class ComponentListEditor : EditorWindow
     // ウィンドウ上のレイアウト
     private void OnGUI(){
         // ラベルの表示
-        GUILayout.Label("プレハブ一覧/検索", EditorStyles.boldLabel);
+        GUILayout.Label("プレハブ一覧・検索・追加", EditorStyles.boldLabel);
         // ポップアップを表示して、選択されたコンポーネントを変数に代入
         selectedComponentType = (ComponentType)EditorGUILayout.EnumPopup("コンポーネント", selectedComponentType);
         // スクロール可能範囲の開始
         scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
 
-        // GetPrefabsWithParticleSystemsメソッドから取得したプレハブの一覧をループ処理し、各プレハブの名前をボタンとして表示
+        // GetPrefabsWithComponentメソッドから取得したプレハブの一覧をループ処理し、各プレハブの名前をボタンとして表示
         foreach (var prefab in GetPrefabsWithComponent(selectedComponentType)){
-            // ボタンが押されたかを判定
             if (GUILayout.Button(prefab.name, GUILayout.Width(position.width - 20))){
-                // 選択されたprefab内のオブジェクトを代入し、CreateParticlePrefabメソッドに移動
+                // 選択されたprefab内のオブジェクトを代入し、CreatePrefabメソッドに移動
                 selectedPrefab = prefab;
-                CreateParticlePrefab();
+                CreatePrefab();
             }
         }
         // スクロール可能範囲の終了
@@ -60,7 +59,7 @@ public class ComponentListEditor : EditorWindow
             // 特定したパスから、プレハブの実際のGameObjectを取得
             prefabs[i] = AssetDatabase.LoadAssetAtPath<GameObject>(path);
         }
-        // Allが選択されていたら全てのプレハブを表示
+        // Allが選択されていたらフィルタリングせずに返す
         if (componentType == ComponentType.All){
             return prefabs;
         }else{
@@ -91,7 +90,7 @@ public class ComponentListEditor : EditorWindow
             //     return typeof(Canvas);
 
             // 追加したコンポーネントに合わせてここに追加
-            // 例えばCanvasを追加したい場合は上記をコメントアウトする
+            // 例えばCanvasを追加したい場合は上記をコメントアウト
 
             // 該当しない場合nullを返す
             default:
@@ -100,14 +99,14 @@ public class ComponentListEditor : EditorWindow
     }
 
     // 選択されたprefab内のオブジェクトをヒエラルキーに追加するメソッド
-    private void CreateParticlePrefab(){
+    private void CreatePrefab(){
         if (selectedPrefab == null) return;
 
         // プレハブをインスタンス化
-        GameObject particlePrefab = PrefabUtility.InstantiatePrefab(selectedPrefab) as GameObject;
+        GameObject Prefab = PrefabUtility.InstantiatePrefab(selectedPrefab) as GameObject;
         // インスタンス化したオブジェクトをヒエラルキーウィンドウで選択状態に変更
-        Selection.activeObject = particlePrefab;
+        Selection.activeObject = Prefab;
         // インスタンス化したオブジェクトをヒエラルキーウィンドウで強調表示
-        EditorGUIUtility.PingObject(particlePrefab);
+        EditorGUIUtility.PingObject(Prefab);
     }
 }
